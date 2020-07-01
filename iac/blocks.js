@@ -13,12 +13,12 @@ Blockly.Blocks['iac_on_gesture'] = {
 							"EVENT_SHAKE"
 						],
 						[
-							"logo up",
-							"EVENT_LOGO_UP"
+							"board up",
+							"EVENT_BOARD_UP"
 						],
 						[
-							"logo down",
-							"EVENT_LOGO_DOWN"
+							"board down",
+							"EVENT_BOARD_DOWN"
 						],
 						[
 							"screen up",
@@ -27,6 +27,10 @@ Blockly.Blocks['iac_on_gesture'] = {
 						[
 							"screen down",
 							"EVENT_SCREEN_DOWN"
+						],
+						[
+							"tilt left",
+							"EVENT_TILT_LEFT"
 						],
 						[
 							"tilt right",
@@ -58,6 +62,8 @@ Blockly.Blocks['iac_on_gesture'] = {
 					"name": "callback"
 				}
 			],
+			"previousStatement": null,
+			"nextStatement": null,
 			"colour": 230,
 			"tooltip": "",
 			"helpUrl": ""
@@ -130,12 +136,12 @@ Blockly.Blocks['iac_is_gesture'] = {
 							"EVENT_SHAKE"
 						],
 						[
-							"logo up",
-							"EVENT_LOGO_UP"
+							"board up",
+							"EVENT_BOARD_UP"
 						],
 						[
-							"logo down",
-							"EVENT_LOGO_DOWN"
+							"board down",
+							"EVENT_BOARD_DOWN"
 						],
 						[
 							"screen up",
@@ -144,6 +150,10 @@ Blockly.Blocks['iac_is_gesture'] = {
 						[
 							"screen down",
 							"EVENT_SCREEN_DOWN"
+						],
+						[
+							"tilt left",
+							"EVENT_TILT_LEFT"
 						],
 						[
 							"tilt right",
@@ -267,20 +277,20 @@ Blockly.Blocks['iac_set_accellerometer_range'] = {
 					"name": "range",
 					"options": [
 						[
-							"1g",
-							"OPTIONNAME"
-						],
-						[
 							"2g",
-							"OPTIONNAME"
+							"2"
 						],
 						[
 							"4g",
-							"OPTIONNAME"
+							"4"
 						],
 						[
 							"8g",
-							"OPTIONNAME"
+							"8"
+						],
+						[
+							"16g",
+							"16"
 						]
 					]
 				}

@@ -49,27 +49,27 @@ Blockly.JavaScript['iac_set_accellerometer_range'] = function (block) {
 };
 
 Blockly.JavaScript['sram_write_byte'] = function (block) {
-	var value_address = Blockly.JavaScript.valueToCode(block, 'address', Blockly.JavaScript.ORDER_ATOMIC);
-	var value_data = Blockly.JavaScript.valueToCode(block, 'data', Blockly.JavaScript.ORDER_ATOMIC);
+	var value_address = Blockly.JavaScript.valueToCode(block, 'address', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+	var value_data = Blockly.JavaScript.valueToCode(block, 'data', Blockly.JavaScript.ORDER_ATOMIC) || '0';
 	var code = `${iAC_BEGIN_WORD}.sram_write_byte(${value_address}, ${value_data});\n`;
 	return code;
 };
 
 Blockly.JavaScript['sram_read_byte'] = function (block) {
-	var value_address = Blockly.JavaScript.valueToCode(block, 'address', Blockly.JavaScript.ORDER_ATOMIC);
+	var value_address = Blockly.JavaScript.valueToCode(block, 'address', Blockly.JavaScript.ORDER_ATOMIC) || '0';
 	var code = `${iAC_BEGIN_WORD}.sram_read_byte(${value_address})`;
 	return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript['eeprom_write_byte'] = function (block) {
-	var value_address = Blockly.JavaScript.valueToCode(block, 'address', Blockly.JavaScript.ORDER_ATOMIC);
-	var value_data = Blockly.JavaScript.valueToCode(block, 'data', Blockly.JavaScript.ORDER_ATOMIC);
+	var value_address = Blockly.JavaScript.valueToCode(block, 'address', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+	var value_data = Blockly.JavaScript.valueToCode(block, 'data', Blockly.JavaScript.ORDER_ATOMIC) || '0';
 	var code = `${iAC_BEGIN_WORD}.eeprom_write_byte(${value_address}, ${value_data});\n`;
 	return code;
 };
 
 Blockly.JavaScript['eeprom_read_byte'] = function (block) {
-	var value_address = Blockly.JavaScript.valueToCode(block, 'address', Blockly.JavaScript.ORDER_ATOMIC);
+	var value_address = Blockly.JavaScript.valueToCode(block, 'address', Blockly.JavaScript.ORDER_ATOMIC) || '0';
 	var code = `${iAC_BEGIN_WORD}.eeprom_read_byte(${value_address})`;
 	return [code, Blockly.JavaScript.ORDER_NONE];
 };

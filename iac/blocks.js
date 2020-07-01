@@ -2,54 +2,54 @@ Blockly.Blocks['iac_on_gesture'] = {
 	init: function () {
 		this.jsonInit({
 			"type": "iac_on_gesture",
-			"message0": "on %1 %2 %3",
+			"message0": Blockly.Msg.IAC_ON_GESTURE_MESSAGE,
 			"args0": [
 				{
 					"type": "field_dropdown",
 					"name": "gesture",
 					"options": [
 						[
-							"shake",
+							Blockly.Msg.IAC_GESTURE_SHAKE_MESSAGE,
 							"EVENT_SHAKE"
 						],
 						[
-							"board up",
+							Blockly.Msg.IAC_GESTURE_BOARD_UP_MESSAGE,
 							"EVENT_BOARD_UP"
 						],
 						[
-							"board down",
+							Blockly.Msg.IAC_GESTURE_BOARD_DOWN_MESSAGE,
 							"EVENT_BOARD_DOWN"
 						],
 						[
-							"screen up",
+							Blockly.Msg.IAC_GESTURE_SCREEON_UP_MESSAGE,
 							"EVENT_SCREEN_UP"
 						],
 						[
-							"screen down",
+							Blockly.Msg.IAC_GESTURE_SCREEON_DOWN_MESSAGE,
 							"EVENT_SCREEN_DOWN"
 						],
 						[
-							"tilt left",
+							Blockly.Msg.IAC_GESTURE_TILT_LEFT_MESSAGE,
 							"EVENT_TILT_LEFT"
 						],
 						[
-							"tilt right",
+							Blockly.Msg.IAC_GESTURE_TILT_RIGHT_MESSAGE,
 							"EVENT_TILT_RIGHT"
 						],
 						[
-							"free fall",
+							Blockly.Msg.IAC_GESTURE_FREE_FALL_MESSAGE,
 							"EVENT_FREE_FALL"
 						],
 						[
-							"3g",
+							Blockly.Msg.IAC_GESTURE_3G_MESSAGE,
 							"EVENT_3G"
 						],
 						[
-							"6g",
+							Blockly.Msg.IAC_GESTURE_6G_MESSAGE,
 							"EVENT_6G"
 						],
 						[
-							"8g",
+							Blockly.Msg.IAC_GESTURE_8G_MESSAGE,
 							"EVENT_8G"
 						]
 					]
@@ -65,7 +65,7 @@ Blockly.Blocks['iac_on_gesture'] = {
 			"previousStatement": null,
 			"nextStatement": null,
 			"colour": 230,
-			"tooltip": "",
+			"tooltip": Blockly.Msg.IAC_ON_GESTURE_TOOLTIP,
 			"helpUrl": ""
 		});
 	}
@@ -75,7 +75,7 @@ Blockly.Blocks['iac_acceleration'] = {
 	init: function () {
 		this.jsonInit({
 			"type": "iac_acceleration",
-			"message0": "acceleration (mg) %1",
+			"message0": Blockly.Msg.IAC_ACCELERATION_MESSAGE,
 			"args0": [
 				{
 					"type": "field_dropdown",
@@ -102,7 +102,7 @@ Blockly.Blocks['iac_acceleration'] = {
 			],
 			"output": null,
 			"colour": 230,
-			"tooltip": "",
+			"tooltip": Blockly.Msg.IAC_ACCELERATION_TOOLTIP,
 			"helpUrl": ""
 		});
 	}
@@ -112,10 +112,10 @@ Blockly.Blocks['iac_compass_heading'] = {
 	init: function () {
 		this.jsonInit({
 			"type": "iac_compass_heading",
-			"message0": "compass heading (°)",
+			"message0": Blockly.Msg.IAC_COMPASS_HEADING_MESSAGE,
 			"output": null,
 			"colour": 230,
-			"tooltip": "",
+			"tooltip": Blockly.Msg.IAC_COMPASS_HEADING_TOOLTIP,
 			"helpUrl": ""
 		});
 	}
@@ -125,54 +125,54 @@ Blockly.Blocks['iac_is_gesture'] = {
 	init: function () {
 		this.jsonInit({
 			"type": "iac_is_gesture",
-			"message0": "is %1 gesture",
+			"message0": Blockly.Msg.IAC_IS_GESTURE_MESSAGE,
 			"args0": [
 				{
 					"type": "field_dropdown",
 					"name": "gesture",
 					"options": [
 						[
-							"shake",
+							Blockly.Msg.IAC_GESTURE_SHAKE_MESSAGE,
 							"EVENT_SHAKE"
 						],
 						[
-							"board up",
+							Blockly.Msg.IAC_GESTURE_BOARD_UP_MESSAGE,
 							"EVENT_BOARD_UP"
 						],
 						[
-							"board down",
+							Blockly.Msg.IAC_GESTURE_BOARD_DOWN_MESSAGE,
 							"EVENT_BOARD_DOWN"
 						],
 						[
-							"screen up",
+							Blockly.Msg.IAC_GESTURE_SCREEON_UP_MESSAGE,
 							"EVENT_SCREEN_UP"
 						],
 						[
-							"screen down",
+							Blockly.Msg.IAC_GESTURE_SCREEON_DOWN_MESSAGE,
 							"EVENT_SCREEN_DOWN"
 						],
 						[
-							"tilt left",
+							Blockly.Msg.IAC_GESTURE_TILT_LEFT_MESSAGE,
 							"EVENT_TILT_LEFT"
 						],
 						[
-							"tilt right",
+							Blockly.Msg.IAC_GESTURE_TILT_RIGHT_MESSAGE,
 							"EVENT_TILT_RIGHT"
 						],
 						[
-							"free fall",
+							Blockly.Msg.IAC_GESTURE_FREE_FALL_MESSAGE,
 							"EVENT_FREE_FALL"
 						],
 						[
-							"3g",
+							Blockly.Msg.IAC_GESTURE_3G_MESSAGE,
 							"EVENT_3G"
 						],
 						[
-							"6g",
+							Blockly.Msg.IAC_GESTURE_6G_MESSAGE,
 							"EVENT_6G"
 						],
 						[
-							"8g",
+							Blockly.Msg.IAC_GESTURE_8G_MESSAGE,
 							"EVENT_8G"
 						]
 					]
@@ -190,18 +190,18 @@ Blockly.Blocks['iac_rotation'] = {
 	init: function () {
 		this.jsonInit({
 			"type": "iac_rotation",
-			"message0": "rotation (°) %1",
+			"message0": Blockly.Msg.IAC_ROTATION_MESSAGE,
 			"args0": [
 				{
 					"type": "field_dropdown",
 					"name": "axis",
 					"options": [
 						[
-							"pitch",
+							Blockly.Msg.IAC_PITCH_MESSAGE,
 							"AXIS_PITCH"
 						],
 						[
-							"roll",
+							Blockly.Msg.IAC_ROLL_MESSAGE,
 							"AXIS_ROLL"
 						]
 					]
@@ -219,7 +219,7 @@ Blockly.Blocks['iac_magnetic_force'] = {
 	init: function () {
 		this.jsonInit({
 			"type": "iac_magnetic_force",
-			"message0": "magnetic force (uT) %1",
+			"message0": Blockly.Msg.IAC_MAGNETIC_FORCE_MESSAGE,
 			"args0": [
 				{
 					"type": "field_dropdown",
@@ -246,7 +246,7 @@ Blockly.Blocks['iac_magnetic_force'] = {
 			],
 			"output": null,
 			"colour": 230,
-			"tooltip": "",
+			"tooltip": Blockly.Msg.IAC_MAGNETIC_FORCE_TOOLTIP,
 			"helpUrl": ""
 		});
 	}
@@ -256,11 +256,11 @@ Blockly.Blocks['iac_calibrate_compass'] = {
 	init: function () {
 		this.jsonInit({
 			"type": "iac_calibrate_compass",
-			"message0": "calibrate compass",
+			"message0": Blockly.Msg.IAC_CALIBATE_COMPASS_MESSAGE,
 			"previousStatement": null,
 			"nextStatement": null,
 			"colour": 230,
-			"tooltip": "",
+			"tooltip": Blockly.Msg.IAC_CALIBATE_COMPASS_TOOLTIP,
 			"helpUrl": ""
 		});
 	}
@@ -270,7 +270,7 @@ Blockly.Blocks['iac_set_accellerometer_range'] = {
 	init: function () {
 		this.jsonInit({
 			"type": "iac_set_accellerometer_range",
-			"message0": "set accellerometer range %1",
+			"message0": Blockly.Msg.IAC_SET_ACCELLEROMETER_MESSAGE,
 			"args0": [
 				{
 					"type": "field_dropdown",
@@ -298,7 +298,7 @@ Blockly.Blocks['iac_set_accellerometer_range'] = {
 			"previousStatement": null,
 			"nextStatement": null,
 			"colour": 230,
-			"tooltip": "",
+			"tooltip": Blockly.Msg.IAC_SET_ACCELLEROMETER_TOOLTIP,
 			"helpUrl": ""
 		});
 	}
@@ -308,7 +308,7 @@ Blockly.Blocks['sram_write_byte'] = {
 	init: function () {
 		this.jsonInit({
 			"type": "sram_write_byte",
-			"message0": "sram address %1 write byte %2",
+			"message0": Blockly.Msg.IAC_SRAM_WRITE_BYTE_MESSAGE,
 			"args0": [
 				{
 					"type": "input_value",
@@ -324,7 +324,7 @@ Blockly.Blocks['sram_write_byte'] = {
 			"previousStatement": null,
 			"nextStatement": null,
 			"colour": 300,
-			"tooltip": "",
+			"tooltip": Blockly.Msg.IAC_SRAM_WRITE_BYTE_TOOLTIP,
 			"helpUrl": ""
 		});
 	}
@@ -334,7 +334,7 @@ Blockly.Blocks['sram_read_byte'] = {
 	init: function () {
 		this.jsonInit({
 			"type": "sram_read_byte",
-			"message0": "sram read byte from address %1",
+			"message0": Blockly.Msg.IAC_SRAM_READ_BYTE_MESSAGE,
 			"args0": [
 				{
 					"type": "input_value",
@@ -345,7 +345,7 @@ Blockly.Blocks['sram_read_byte'] = {
 			"inputsInline": true,
 			"output": null,
 			"colour": 300,
-			"tooltip": "",
+			"tooltip": Blockly.Msg.IAC_SRAM_READ_BYTE_TOOLTIP,
 			"helpUrl": ""
 		});
 	}
@@ -355,7 +355,7 @@ Blockly.Blocks['eeprom_write_byte'] = {
 	init: function () {
 		this.jsonInit({
 			"type": "eeprom_write_byte",
-			"message0": "eeprom address %1 write byte %2",
+			"message0": Blockly.Msg.IAC_EEPROM_WRITE_BYTE_MESSAGE,
 			"args0": [
 				{
 					"type": "input_value",
@@ -371,7 +371,7 @@ Blockly.Blocks['eeprom_write_byte'] = {
 			"previousStatement": null,
 			"nextStatement": null,
 			"colour": 300,
-			"tooltip": "",
+			"tooltip": Blockly.Msg.IAC_EEPROM_WRITE_BYTE_TOOLTIP,
 			"helpUrl": ""
 		});
 	}
@@ -381,7 +381,7 @@ Blockly.Blocks['eeprom_read_byte'] = {
 	init: function () {
 		this.jsonInit({
 			"type": "eeprom_read_byte",
-			"message0": "eeprom read byte from address %1",
+			"message0": Blockly.Msg.IAC_EEPROM_READ_BYTE_MESSAGE,
 			"args0": [
 				{
 					"type": "input_value",
@@ -392,7 +392,7 @@ Blockly.Blocks['eeprom_read_byte'] = {
 			"inputsInline": true,
 			"output": null,
 			"colour": 300,
-			"tooltip": "",
+			"tooltip": Blockly.Msg.IAC_EEPROM_READ_BYTE_TOOLTIP,
 			"helpUrl": ""
 		});
 	}

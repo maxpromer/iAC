@@ -303,3 +303,97 @@ Blockly.Blocks['iac_set_accellerometer_range'] = {
 		});
 	}
 };
+
+Blockly.Blocks['sram_write_byte'] = {
+	init: function () {
+		this.jsonInit({
+			"type": "sram_write_byte",
+			"message0": "sram address %1 write byte %2",
+			"args0": [
+				{
+					"type": "input_value",
+					"name": "address",
+					"check": "Number"
+				},
+				{
+					"type": "input_value",
+					"name": "data"
+				}
+			],
+			"inputsInline": true,
+			"previousStatement": null,
+			"nextStatement": null,
+			"colour": 300,
+			"tooltip": "",
+			"helpUrl": ""
+		});
+	}
+};
+
+Blockly.Blocks['sram_read_byte'] = {
+	init: function () {
+		this.jsonInit({
+			"type": "sram_read_byte",
+			"message0": "sram read byte from address %1",
+			"args0": [
+				{
+					"type": "input_value",
+					"name": "address",
+					"check": "Number"
+				}
+			],
+			"inputsInline": true,
+			"output": null,
+			"colour": 300,
+			"tooltip": "",
+			"helpUrl": ""
+		});
+	}
+};
+
+Blockly.Blocks['eeprom_write_byte'] = {
+	init: function () {
+		this.jsonInit({
+			"type": "eeprom_write_byte",
+			"message0": "eeprom address %1 write byte %2",
+			"args0": [
+				{
+					"type": "input_value",
+					"name": "address",
+					"check": "Number"
+				},
+				{
+					"type": "input_value",
+					"name": "data"
+				}
+			],
+			"inputsInline": true,
+			"previousStatement": null,
+			"nextStatement": null,
+			"colour": 300,
+			"tooltip": "",
+			"helpUrl": ""
+		});
+	}
+};
+
+Blockly.Blocks['eeprom_read_byte'] = {
+	init: function () {
+		this.jsonInit({
+			"type": "eeprom_read_byte",
+			"message0": "eeprom read byte from address %1",
+			"args0": [
+				{
+					"type": "input_value",
+					"name": "address",
+					"check": "Number"
+				}
+			],
+			"inputsInline": true,
+			"output": null,
+			"colour": 300,
+			"tooltip": "",
+			"helpUrl": ""
+		});
+	}
+};

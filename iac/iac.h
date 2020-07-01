@@ -68,6 +68,8 @@ private:
 	} state;
 	TickType_t tickcnt, polling_tickcnt;
 
+	I2CDev *i2c;
+
 	LSM303AGR_ACC_Sensor *Acc;
 	LSM303AGR_MAG_Sensor *Mag;
 
@@ -107,6 +109,17 @@ public:
 	double magnetic_force(acc_meg_axis axis);
 	void calibrate_compass(HT16K33 *);
 	void accellerometer_range(float range);
+
+	// SRAM on RTC
+	void sram_write_byte(int, int);
+	void sram_write_byte(int, void*);
+	int sram_read_byte(int);
+
+	// EEPROM on RTC
+	void eeprom_write_byte(int, int);
+	void eeprom_write_byte(int, void*);
+	int eeprom_read_byte(int);
+
 };
 
 #endif

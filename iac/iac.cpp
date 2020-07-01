@@ -66,7 +66,7 @@ bool iAC::prop_write(int index, char *value)
 
 void iAC::process(Driver *drv)
 {
-	I2CDev *i2c = (I2CDev *)drv;
+	i2c = (I2CDev *)drv;
 	switch (state)
 	{
 	case s_detect:
@@ -463,6 +463,60 @@ void iAC::accellerometer_range(float range)
 	}
 
 	acc_range = range;
+}
+
+void iAC::sram_write_byte(int addr, int data) {
+	if (addr < 0 || addr > 63) {
+		return;
+	}
+
+	uint8_t buff[2] = { (uint8_t)(addr + 0x20), (uint8_t)data };
+	i2c->write(0, 0x6F, buff, 2);
+}
+
+void iAC::sram_write_byte(int addr, void *data) {
+	if (!data) return;
+
+	sram_write_byte(addr, (int)((uint8_t*)data)[0]);
+}
+
+int iAC::sram_read_byte(int addr) {
+	if (addr < 0 || addr > 63) {
+		return 0;
+	}
+
+	uint8_t data;
+	addr += 0x20;
+	i2c->read(0, 0x6F, (uint8_t*)&addr, 1, (uint8_t*)&data, 1);
+
+	return data;
+}
+
+void iAC::eeprom_write_byte(int addr, int data) {
+	if (addr < 0 || addr > 127) {
+		return;
+	}
+
+	uint8_t buff[2] = { (uint8_t)(addr + 0x20), (uint8_t)data };
+	i2c->write(0, 0x57, buff, 2);
+}
+
+void iAC::eeprom_write_byte(int addr, void *data) {
+	if (!data) return;
+
+	eeprom_write_byte(addr, (int)((uint8_t*)data)[0]);
+}
+
+int iAC::eeprom_read_byte(int addr) {
+	if (addr < 0 || addr > 127) {
+		return 0;
+	}
+
+	uint8_t data;
+	addr += 0x20;
+	i2c->read(0, 0x57, (uint8_t*)&addr, 1, (uint8_t*)&data, 1);
+
+	return data;
 }
 
 #endif

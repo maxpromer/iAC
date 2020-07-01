@@ -576,7 +576,7 @@ int iAC::eeprom_read_byte(int addr) {
 }
 
 void iAC::eeprom_write_word(int addr, int16_t data) {
-	if (addr < 0 || addr > 63) {
+	if (addr < 0 || addr > 127) {
 		return;
 	}
 
@@ -592,7 +592,7 @@ void iAC::eeprom_write_word(int addr, void *data) {
 }
 
 int16_t iAC::eeprom_read_word(int addr) {
-	if (addr < 0 || addr > 63) {
+	if (addr < 0 || addr > 127) {
 		return 0;
 	}
 
@@ -603,7 +603,7 @@ int16_t iAC::eeprom_read_word(int addr) {
 }
 
 void iAC::eeprom_write_dword(int addr, int32_t data) {
-	if (addr < 0 || addr > 63) {
+	if (addr < 0 || addr > 127) {
 		return;
 	}
 
@@ -615,11 +615,11 @@ void iAC::eeprom_write_dword(int addr, int32_t data) {
 void iAC::eeprom_write_dword(int addr, void *data) {
 	if (!data) return;
 
-	sram_write_dword(addr, (int32_t)((int32_t*)data)[0]);
+	eeprom_write_dword(addr, (int32_t)((int32_t*)data)[0]);
 }
 
 int32_t iAC::eeprom_read_dword(int addr) {
-	if (addr < 0 || addr > 63) {
+	if (addr < 0 || addr > 127) {
 		return 0;
 	}
 

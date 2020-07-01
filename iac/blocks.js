@@ -343,9 +343,103 @@ Blockly.Blocks['sram_read_byte'] = {
 				}
 			],
 			"inputsInline": true,
-			"output": null,
+			"output": "Number",
 			"colour": 300,
 			"tooltip": Blockly.Msg.IAC_SRAM_READ_BYTE_TOOLTIP,
+			"helpUrl": ""
+		});
+	}
+};
+
+Blockly.Blocks['sram_write_word'] = {
+	init: function () {
+		this.jsonInit({
+			"type": "sram_write_word",
+			"message0": Blockly.Msg.IAC_SRAM_WRITE_WORD_MESSAGE,
+			"args0": [
+				{
+					"type": "input_value",
+					"name": "address",
+					"check": "Number"
+				},
+				{
+					"type": "input_value",
+					"name": "data"
+				}
+			],
+			"inputsInline": true,
+			"previousStatement": null,
+			"nextStatement": null,
+			"colour": 300,
+			"tooltip": Blockly.Msg.IAC_SRAM_WRITE_WORD_TOOLTIP,
+			"helpUrl": ""
+		});
+	}
+};
+
+Blockly.Blocks['sram_read_word'] = {
+	init: function () {
+		this.jsonInit({
+			"type": "sram_read_word",
+			"message0": Blockly.Msg.IAC_SRAM_READ_WORD_MESSAGE,
+			"args0": [
+				{
+					"type": "input_value",
+					"name": "address",
+					"check": "Number"
+				}
+			],
+			"inputsInline": true,
+			"output": "Number",
+			"colour": 300,
+			"tooltip": Blockly.Msg.IAC_SRAM_READ_WORD_TOOLTIP,
+			"helpUrl": ""
+		});
+	}
+};
+
+Blockly.Blocks['sram_write_dword'] = {
+	init: function () {
+		this.jsonInit({
+			"type": "sram_write_dword",
+			"message0": Blockly.Msg.IAC_SRAM_WRITE_DWORD_MESSAGE,
+			"args0": [
+				{
+					"type": "input_value",
+					"name": "address",
+					"check": "Number"
+				},
+				{
+					"type": "input_value",
+					"name": "data"
+				}
+			],
+			"inputsInline": true,
+			"previousStatement": null,
+			"nextStatement": null,
+			"colour": 300,
+			"tooltip": Blockly.Msg.IAC_SRAM_WRITE_DWORD_TOOLTIP,
+			"helpUrl": ""
+		});
+	}
+};
+
+Blockly.Blocks['sram_read_dword'] = {
+	init: function () {
+		this.jsonInit({
+			"type": "sram_read_dword",
+			"message0": Blockly.Msg.IAC_SRAM_READ_DWORD_MESSAGE,
+			"args0": [
+				{
+					"type": "input_value",
+					"name": "address",
+					"check": "Number"
+				}
+			],
+			"inputsInline": true,
+			"output": "Number",
+			"colour": 300,
+			"tooltip": Blockly.Msg.IAC_SRAM_READ_DWORD_TOOLTIP,
 			"helpUrl": ""
 		});
 	}
@@ -390,9 +484,103 @@ Blockly.Blocks['eeprom_read_byte'] = {
 				}
 			],
 			"inputsInline": true,
-			"output": null,
+			"output": "Number",
 			"colour": 300,
 			"tooltip": Blockly.Msg.IAC_EEPROM_READ_BYTE_TOOLTIP,
+			"helpUrl": ""
+		});
+	}
+};
+
+Blockly.Blocks['eeprom_write_word'] = {
+	init: function () {
+		this.jsonInit({
+			"type": "eeprom_write_word",
+			"message0": Blockly.Msg.IAC_EEPROM_WRITE_WORD_MESSAGE,
+			"args0": [
+				{
+					"type": "input_value",
+					"name": "address",
+					"check": "Number"
+				},
+				{
+					"type": "input_value",
+					"name": "data"
+				}
+			],
+			"inputsInline": true,
+			"previousStatement": null,
+			"nextStatement": null,
+			"colour": 300,
+			"tooltip": Blockly.Msg.IAC_EEPROM_WRITE_WORD_TOOLTIP,
+			"helpUrl": ""
+		});
+	}
+};
+
+Blockly.Blocks['eeprom_read_word'] = {
+	init: function () {
+		this.jsonInit({
+			"type": "eeprom_read_word",
+			"message0": Blockly.Msg.IAC_EEPROM_READ_WORD_MESSAGE,
+			"args0": [
+				{
+					"type": "input_value",
+					"name": "address",
+					"check": "Number"
+				}
+			],
+			"inputsInline": true,
+			"output": "Number",
+			"colour": 300,
+			"tooltip": Blockly.Msg.IAC_EEPROM_READ_WORD_TOOLTIP,
+			"helpUrl": ""
+		});
+	}
+};
+
+Blockly.Blocks['eeprom_write_dword'] = {
+	init: function () {
+		this.jsonInit({
+			"type": "eeprom_write_dword",
+			"message0": Blockly.Msg.IAC_EEPROM_WRITE_DWORD_MESSAGE,
+			"args0": [
+				{
+					"type": "input_value",
+					"name": "address",
+					"check": "Number"
+				},
+				{
+					"type": "input_value",
+					"name": "data"
+				}
+			],
+			"inputsInline": true,
+			"previousStatement": null,
+			"nextStatement": null,
+			"colour": 300,
+			"tooltip": Blockly.Msg.IAC_EEPROM_WRITE_DWORD_TOOLTIP,
+			"helpUrl": ""
+		});
+	}
+};
+
+Blockly.Blocks['eeprom_read_dword'] = {
+	init: function () {
+		this.jsonInit({
+			"type": "eeprom_read_dword",
+			"message0": Blockly.Msg.IAC_EEPROM_READ_DWORD_MESSAGE,
+			"args0": [
+				{
+					"type": "input_value",
+					"name": "address",
+					"check": "Number"
+				}
+			],
+			"inputsInline": true,
+			"output": "Number",
+			"colour": 300,
+			"tooltip": Blockly.Msg.IAC_EEPROM_READ_DWORD_TOOLTIP,
 			"helpUrl": ""
 		});
 	}

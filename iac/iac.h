@@ -114,11 +114,24 @@ public:
 	void sram_write_byte(int, int);
 	void sram_write_byte(int, void*);
 	int sram_read_byte(int);
+	void sram_write_word(int, int16_t);
+	void sram_write_word(int, void*);
+	int16_t sram_read_word(int);
+	void sram_write_dword(int, int32_t);
+	void sram_write_dword(int, void*);
+	int32_t sram_read_dword(int);
+
 
 	// EEPROM on RTC
 	void eeprom_write_byte(int, int);
 	void eeprom_write_byte(int, void*);
 	int eeprom_read_byte(int);
+	void eeprom_write_word(int, int16_t);
+	void eeprom_write_word(int, void*);
+	int16_t eeprom_read_word(int);
+	void eeprom_write_dword(int, int32_t);
+	void eeprom_write_dword(int, void*);
+	int32_t eeprom_read_dword(int);
 
 };
 

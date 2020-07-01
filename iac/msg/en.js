@@ -28,11 +28,35 @@ Blockly.Msg.IAC_SRAM_WRITE_BYTE_TOOLTIP = "";
 Blockly.Msg.IAC_SRAM_READ_BYTE_MESSAGE = "sram read byte from address %1";
 Blockly.Msg.IAC_SRAM_READ_BYTE_TOOLTIP = "";
 
+Blockly.Msg.IAC_SRAM_WRITE_WORD_MESSAGE = "sram address %1 write word %2";
+Blockly.Msg.IAC_SRAM_WRITE_WORD_TOOLTIP = "";
+
+Blockly.Msg.IAC_SRAM_READ_WORD_MESSAGE = "sram read word from address %1";
+Blockly.Msg.IAC_SRAM_READ_WORD_TOOLTIP = "";
+
+Blockly.Msg.IAC_SRAM_WRITE_DWORD_MESSAGE = "sram address %1 write dword %2";
+Blockly.Msg.IAC_SRAM_WRITE_DWORD_TOOLTIP = "";
+
+Blockly.Msg.IAC_SRAM_READ_DWORD_MESSAGE = "sram read dword from address %1";
+Blockly.Msg.IAC_SRAM_READ_DWORD_TOOLTIP = "";
+
 Blockly.Msg.IAC_EEPROM_WRITE_BYTE_MESSAGE = "eeprom address %1 write byte %2";
 Blockly.Msg.IAC_EEPROM_WRITE_BYTE_TOOLTIP = "";
 
 Blockly.Msg.IAC_EEPROM_READ_BYTE_MESSAGE = "eeprom read byte from address %1";
 Blockly.Msg.IAC_EEPROM_READ_BYTE_TOOLTIP = "";
+
+Blockly.Msg.IAC_EEPROM_WRITE_WORD_MESSAGE = "eeprom address %1 write word %2";
+Blockly.Msg.IAC_EEPROM_WRITE_WORD_TOOLTIP = "";
+
+Blockly.Msg.IAC_EEPROM_READ_WORD_MESSAGE = "eeprom read word from address %1";
+Blockly.Msg.IAC_EEPROM_READ_WORD_TOOLTIP = "";
+
+Blockly.Msg.IAC_EEPROM_WRITE_DWORD_MESSAGE = "eeprom address %1 write dword %2";
+Blockly.Msg.IAC_EEPROM_WRITE_DWORD_TOOLTIP = "";
+
+Blockly.Msg.IAC_EEPROM_READ_DWORD_MESSAGE = "eeprom read dword from address %1";
+Blockly.Msg.IAC_EEPROM_READ_DWORD_TOOLTIP = "";
 
 Blockly.Msg.IAC_GESTURE_SHAKE_MESSAGE = "shake";
 Blockly.Msg.IAC_GESTURE_BOARD_UP_MESSAGE = "board up";

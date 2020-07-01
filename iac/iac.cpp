@@ -492,12 +492,69 @@ int iAC::sram_read_byte(int addr) {
 	return data;
 }
 
+void iAC::sram_write_word(int addr, int16_t data) {
+	if (addr < 0 || addr > 63) {
+		return;
+	}
+
+	uint8_t buff[3] = { (uint8_t)(addr + 0x20) };
+	memcpy(&buff[1], &data, 2);
+	i2c->write(0, 0x6F, buff, 3);
+}
+
+void iAC::sram_write_word(int addr, void *data) {
+	if (!data) return;
+
+	sram_write_word(addr, (int16_t)((int16_t*)data)[0]);
+}
+
+int16_t iAC::sram_read_word(int addr) {
+	if (addr < 0 || addr > 63) {
+		return 0;
+	}
+
+	int16_t data;
+	addr += 0x20;
+	i2c->read(0, 0x6F, (uint8_t*)&addr, 1, (uint8_t*)&data, 2);
+
+	return data;
+}
+
+void iAC::sram_write_dword(int addr, int32_t data) {
+	if (addr < 0 || addr > 63) {
+		return;
+	}
+
+	addr += 0x20;
+	uint8_t buff[5] = { (uint8_t)(addr) };
+	memcpy(&buff[1], &data, 4);
+	i2c->write(0, 0x6F, buff, 5);
+}
+
+void iAC::sram_write_dword(int addr, void *data) {
+	if (!data) return;
+
+	sram_write_dword(addr, (int32_t)((int32_t*)data)[0]);
+}
+
+int32_t iAC::sram_read_dword(int addr) {
+	if (addr < 0 || addr > 63) {
+		return 0;
+	}
+
+	int32_t data;
+	addr += 0x20;
+	i2c->read(0, 0x6F, (uint8_t*)&addr, 1, (uint8_t*)&data, 4);
+
+	return data;
+}
+
 void iAC::eeprom_write_byte(int addr, int data) {
 	if (addr < 0 || addr > 127) {
 		return;
 	}
 
-	uint8_t buff[2] = { (uint8_t)(addr + 0x20), (uint8_t)data };
+	uint8_t buff[2] = { (uint8_t)(addr), (uint8_t)data };
 	i2c->write(0, 0x57, buff, 2);
 }
 
@@ -513,8 +570,61 @@ int iAC::eeprom_read_byte(int addr) {
 	}
 
 	uint8_t data;
-	addr += 0x20;
 	i2c->read(0, 0x57, (uint8_t*)&addr, 1, (uint8_t*)&data, 1);
+
+	return data;
+}
+
+void iAC::eeprom_write_word(int addr, int16_t data) {
+	if (addr < 0 || addr > 63) {
+		return;
+	}
+
+	uint8_t buff[3] = { (uint8_t)(addr) };
+	memcpy(&buff[1], &data, 2);
+	i2c->write(0, 0x57, buff, 3);
+}
+
+void iAC::eeprom_write_word(int addr, void *data) {
+	if (!data) return;
+
+	eeprom_write_word(addr, (int16_t)((int16_t*)data)[0]);
+}
+
+int16_t iAC::eeprom_read_word(int addr) {
+	if (addr < 0 || addr > 63) {
+		return 0;
+	}
+
+	int16_t data;
+	i2c->read(0, 0x57, (uint8_t*)&addr, 1, (uint8_t*)&data, 2);
+
+	return data;
+}
+
+void iAC::eeprom_write_dword(int addr, int32_t data) {
+	if (addr < 0 || addr > 63) {
+		return;
+	}
+
+	uint8_t buff[5] = { (uint8_t)(addr) };
+	memcpy(&buff[1], &data, 4);
+	i2c->write(0, 0x57, buff, 5);
+}
+
+void iAC::eeprom_write_dword(int addr, void *data) {
+	if (!data) return;
+
+	sram_write_dword(addr, (int32_t)((int32_t*)data)[0]);
+}
+
+int32_t iAC::eeprom_read_dword(int addr) {
+	if (addr < 0 || addr > 63) {
+		return 0;
+	}
+
+	int32_t data;
+	i2c->read(0, 0x57, (uint8_t*)&addr, 1, (uint8_t*)&data, 4);
 
 	return data;
 }

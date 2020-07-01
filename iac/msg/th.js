@@ -28,11 +28,35 @@ Blockly.Msg.IAC_SRAM_WRITE_BYTE_TOOLTIP = "";
 Blockly.Msg.IAC_SRAM_READ_BYTE_MESSAGE = "SRAM อ่านค่า (1 ไบต์) จากตำแหน่ง %1";
 Blockly.Msg.IAC_SRAM_READ_BYTE_TOOLTIP = "";
 
+Blockly.Msg.IAC_SRAM_WRITE_WORD_MESSAGE = "SRAM ตำแหน่ง %1 บันทึกค่า (2 ไบต์) %2";
+Blockly.Msg.IAC_SRAM_WRITE_WORD_TOOLTIP = "";
+
+Blockly.Msg.IAC_SRAM_READ_WORD_MESSAGE = "SRAM อ่านค่า (2 ไบต์) จากตำแหน่ง %1";
+Blockly.Msg.IAC_SRAM_READ_WORD_TOOLTIP = "";
+
+Blockly.Msg.IAC_SRAM_WRITE_DWORD_MESSAGE = "SRAM ตำแหน่ง %1 บันทึกค่า (4 ไบต์) %2";
+Blockly.Msg.IAC_SRAM_WRITE_DWORD_TOOLTIP = "";
+
+Blockly.Msg.IAC_SRAM_READ_DWORD_MESSAGE = "SRAM อ่านค่า (4 ไบต์) จากตำแหน่ง %1";
+Blockly.Msg.IAC_SRAM_READ_DWORD_TOOLTIP = "";
+
 Blockly.Msg.IAC_EEPROM_WRITE_BYTE_MESSAGE = "EEPROM ตำแหน่ง %1 บันทึกค่า (1 ไบต์) %2";
 Blockly.Msg.IAC_EEPROM_WRITE_BYTE_TOOLTIP = "";
 
 Blockly.Msg.IAC_EEPROM_READ_BYTE_MESSAGE = "EEPROM อ่านค่า (1 ไบต์) จากตำแหน่ง %1";
 Blockly.Msg.IAC_EEPROM_READ_BYTE_TOOLTIP = "";
+
+Blockly.Msg.IAC_EEPROM_WRITE_WORD_MESSAGE = "EEPROM ตำแหน่ง %1 บันทึกค่า (2 ไบต์) %2";
+Blockly.Msg.IAC_EEPROM_WRITE_WORD_TOOLTIP = "";
+
+Blockly.Msg.IAC_EEPROM_READ_WORD_MESSAGE = "EEPROM อ่านค่า (2 ไบต์) จากตำแหน่ง %1";
+Blockly.Msg.IAC_EEPROM_READ_WORD_TOOLTIP = "";
+
+Blockly.Msg.IAC_EEPROM_WRITE_DWORD_MESSAGE = "EEPROM ตำแหน่ง %1 บันทึกค่า (4 ไบต์) %2";
+Blockly.Msg.IAC_EEPROM_WRITE_DWORD_TOOLTIP = "";
+
+Blockly.Msg.IAC_EEPROM_READ_DWORD_MESSAGE = "EEPROM อ่านค่า (4 ไบต์) จากตำแหน่ง %1";
+Blockly.Msg.IAC_EEPROM_READ_DWORD_TOOLTIP = "";
 
 Blockly.Msg.IAC_GESTURE_SHAKE_MESSAGE = "เขย่าบอร์ด";
 Blockly.Msg.IAC_GESTURE_BOARD_UP_MESSAGE = "ตั้งบอร์ดขึ้น";

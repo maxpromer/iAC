@@ -8,10 +8,8 @@
 #include "ht16k33.h"
 
 #include <math.h>
+#include <string.h>
 #include <inttypes.h>
-
-#include "LSM303AGR_ACC_Sensor.h"
-#include "LSM303AGR_MAG_Sensor.h"
 
 enum motion_event
 {
@@ -70,18 +68,15 @@ private:
 
 	I2CDev *i2c;
 
-	LSM303AGR_ACC_Sensor *Acc;
-	LSM303AGR_MAG_Sensor *Mag;
-
 	long map(double x, double in_min, double in_max, double out_min, double out_max)
 	{
 		return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 	}
 
-	LSM303AGR_sensor mag_max = {(float)253, (float)516, (float)126};
-	LSM303AGR_sensor mag_min = {(float)-627, (float)-382, (float)-766};
+	LSM303AGR_sensor mag_max = { 253.0, 516.0, 126.0 };
+	LSM303AGR_sensor mag_min = { -627.0, -382.0, -766.0 };
 
-	float acc_range = 8; // 8g
+	uint8_t acc_range = 8; // 8g
 
 	int32_t accelerometer[3];
 	int32_t magnetometer[3];
@@ -104,7 +99,7 @@ public:
 	void on_gesture(motion_event event, GestureHandle cb);
 	int32_t acceleration(acc_meg_axis axis);
 	int compass_heading();
-	bool is_gesture(motion_event event);
+	bool is_gesture(motion_event event, bool blocking = true);
 	int rotation(acc_meg_axis axis);
 	double magnetic_force(acc_meg_axis axis);
 	void calibrate_compass(HT16K33 *);

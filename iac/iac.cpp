@@ -4,18 +4,46 @@
 #include "iAC.h"
 #include "esp_log.h"
 
+#define ACC_ADDR 0x19
+#define MEG_ADDR 0x1E
+
+#define ACCRANGR2FSMODE(a) (a == 2 ? 0b00 : a == 4 ? 0b01 : a == 8 ? 0b10 : 0b11)
+
+const long long LSM303AGR_ACC_Sensitivity_List[3][4] = {
+	/* HR 12-bit */
+	{
+		980,   /* FS @2g */
+		1950,  /* FS @4g */
+		3900,  /* FS @8g */
+		11720, /* FS @16g */
+	},
+
+	/* Normal 10-bit */
+	{
+		3900,  /* FS @2g */
+		7820,  /* FS @4g */
+		15630, /* FS @8g */
+		46900, /* FS @16g */
+	},
+
+	/* LP 8-bit */
+	{
+		15630,	/* FS @2g */
+		31260,	/* FS @4g */
+		62520,	/* FS @8g */
+		187580, /* FS @16g */
+	},
+};
+
 iAC::iAC(int bus_ch, int dev_addr)
 {
 	channel = bus_ch;
 	address = dev_addr;
-	polling_ms = 50;
+	polling_ms = 40;
 }
 
 void iAC::init(void)
 {
-	Acc = NULL;
-	Mag = NULL;
-
 	// Debug
 	esp_log_level_set("*", ESP_LOG_INFO);
 
@@ -70,44 +98,91 @@ void iAC::process(Driver *drv)
 	switch (state)
 	{
 	case s_detect:
-		// detect i2c device
-		if (i2c->detect(channel, address) == ESP_OK)
-		{
-			ESP_LOGI("iAC", "Found device");
-
-			if (!Acc)
-			{
-				Acc = new LSM303AGR_ACC_Sensor(i2c);
-			}
-			Acc->Enable();
-			// Acc->EnableTemperatureSensor();
-			Acc->SetFS(acc_range);
-
-			if (!Mag)
-			{
-				Mag = new LSM303AGR_MAG_Sensor(i2c);
-			}
-			Mag->Enable();
-
-			for (int i = 0; i < 11; i++)
-			{
-				callbackDoingFlag[i] = false;
-				callbackReadyFlag[i] = false;
-			}
-
-			// clear error flag
-			error = false;
-			// set initialized flag
-			initialized = true;
-
-			// Go to main state
-			state = s_polling;
-		}
-		else
+	{
+		// detect acc i2c device
+		if (i2c->detect(channel, ACC_ADDR) != ESP_OK)
 		{
 			state = s_error;
+			break;
 		}
+
+		ESP_LOGI("iAC", "Found Acc device");
+
+		uint8_t buff[2];
+
+		/* ACC Setup */
+
+		// FIFO mode selection
+		buff[0] = 0x2E;									  // FIFO_CTRL_REG_A
+		buff[1] = (0b00 << 6) | (0 << 5) | (0b0000 << 0); // Bypass mode, trigger event allows triggering signal on INT1
+		if (i2c->write(channel, ACC_ADDR, buff, 2) != ESP_OK)
+		{
+			state = s_error;
+			break;
+		}
+
+		// Set Data rate
+		buff[0] = 0x20;														 // CTRL_REG1_A
+		buff[1] = (0b0101 << 4) | (0 << 3) | (1 << 2) | (1 << 1) | (1 << 0); // 100Hz, Normal mode, XYZ-axis enable
+		if (i2c->write(channel, ACC_ADDR, buff, 2) != ESP_OK)
+		{
+			state = s_error;
+			break;
+		}
+
+		// Set Full-scale selection
+		buff[0] = 0x23;																						   // CTRL_REG4_A
+		buff[1] = (0 << 7) | (0 << 6) | (ACCRANGR2FSMODE(acc_range) << 4) | (0 << 3) | (0b00 << 1) | (0 << 0); //  continuous update, data LSb at lower address,  Full-scale selection, Normal mode, self-test disabled, SPI 3-wire disabled
+		if (i2c->write(channel, ACC_ADDR, buff, 2) != ESP_OK)
+		{
+			state = s_error;
+			break;
+		}
+		/* ACC Setup Done */
+
+		/* MEG Setup */
+
+		if (i2c->detect(channel, MEG_ADDR) != ESP_OK)
+		{
+			state = s_error;
+			break;
+		}
+
+		// MAG Select mode
+		buff[0] = 0x60;
+		/*
+					BIT 7: 1 - temperature compensation enable
+					BIT 6: 0 - normal mode
+					BIT 5: 0 - SOFT_RST
+					BIT 4: 0 - high-resolution mode
+					BIT 3-2: 11 - 100Hz
+					BIT 1-0: 11 - Continuous mode
+					*/
+		buff[1] = (1 << 7) | (0 << 6) | (0 << 5) | (0 << 4) | (0b11 << 2) | (0b00 << 0);
+		if (i2c->write(channel, MEG_ADDR, buff, 2) != ESP_OK)
+		{
+			state = s_error;
+			break;
+		}
+
+		/* MEG Setup Done */
+
+		for (int i = 0; i < 11; i++)
+		{
+			callbackDoingFlag[i] = false;
+			callbackReadyFlag[i] = false;
+		}
+
+		// clear error flag
+		error = false;
+		// set initialized flag
+		initialized = true;
+
+		// Go to main state
+		state = s_polling;
+
 		break;
+	}
 
 	case s_polling:
 	{
@@ -115,19 +190,52 @@ void iAC::process(Driver *drv)
 		{
 			tickcnt = get_tickcnt();
 
-			// Read accelerometer LSM303AGR.
-			Acc->GetAxes(accelerometer);
+			/* op mode is Normal 10-bit */
+			int op_mode = 1;
+			int shift = 6;
+			int fs_mode = ACCRANGR2FSMODE(acc_range);
+			uint8_t reg = 0;
+
+			int16_t rawData[3];
+
+			memset(rawData, 0, 6);
+			for (int i = 0; i < 6; i++)
+			{
+				reg = 0x28 + i; // Acc Raw Data
+				if (i2c->read(channel, ACC_ADDR, &reg, 1, &((uint8_t *)rawData)[i], 1) != ESP_OK)
+				{
+					state = s_error;
+					break;
+				}
+			}
+
+			accelerometer[0] = ((rawData[0] >> shift) * LSM303AGR_ACC_Sensitivity_List[op_mode][fs_mode] + 500) / 1000;
+			accelerometer[1] = ((rawData[1] >> shift) * LSM303AGR_ACC_Sensitivity_List[op_mode][fs_mode] + 500) / 1000;
+			accelerometer[2] = ((rawData[2] >> shift) * LSM303AGR_ACC_Sensitivity_List[op_mode][fs_mode] + 500) / 1000;
 
 			// Read magnetometer LSM303AGR.
-			Mag->GetAxes(magnetometer);
+			memset(rawData, 0, 6);
+			for (int i = 0; i < 6; i++)
+			{
+				reg = 0x68 + i; // OUTX_L_REG_M : Meg Raw Data
+				if (i2c->read(channel, MEG_ADDR, &reg, 1, &((uint8_t *)rawData)[i], 1) != ESP_OK)
+				{
+					state = s_error;
+					break;
+				}
+			}
 
-			for (int inx = EVENT_SHAKE; inx != EVENT_FREE_FALL; inx++)
+			magnetometer[0] = rawData[0] * 1.5f;
+			magnetometer[1] = rawData[1] * 1.5f;
+			magnetometer[2] = rawData[2] * 1.5f;
+
+			for (int inx = EVENT_SHAKE; inx <= EVENT_FREE_FALL; inx++)
 			{
 				if (callbackDoingFlag[inx])
 					continue;
 
 				motion_event event = static_cast<motion_event>(inx);
-				if (is_gesture(event))
+				if (is_gesture(event, false)) // non-blocking
 				{
 					if (GestureCallback[inx] && callbackReadyFlag[inx] == false)
 					{
@@ -198,13 +306,7 @@ void iAC::on_gesture(motion_event event, GestureHandle cb)
 
 int32_t iAC::acceleration(acc_meg_axis axis)
 {
-	if (!Acc)
-	{
-		ESP_LOGI("iAC", "Acc is null");
-		return 0;
-	}
-
-	ESP_LOGI("iAC", "Acc: %" PRId32 " %" PRId32 " %" PRId32, accelerometer[0], accelerometer[1], accelerometer[2]);
+	// ESP_LOGI("iAC", "Acc: %" PRId32 " %" PRId32 " %" PRId32, accelerometer[0], accelerometer[1], accelerometer[2]);
 
 	switch (axis)
 	{
@@ -215,7 +317,7 @@ int32_t iAC::acceleration(acc_meg_axis axis)
 		return -accelerometer[1];
 
 	case AXIS_Z:
-		return -accelerometer[2];
+		return accelerometer[2];
 
 	case STRENGTH:
 		return sqrt(pow(accelerometer[0], 2) + pow(accelerometer[1], 2) + pow(accelerometer[2], 2));
@@ -227,18 +329,6 @@ int32_t iAC::acceleration(acc_meg_axis axis)
 
 int iAC::compass_heading()
 {
-	if (!Acc)
-	{
-		ESP_LOGI("iAC", "Acc is null");
-		return 0;
-	}
-
-	if (!Mag)
-	{
-		ESP_LOGI("iAC", "Mag is null");
-		return 0;
-	}
-
 	LSM303AGR_sensor m = {(float)magnetometer[0], (float)magnetometer[1], (float)magnetometer[2]};
 	LSM303AGR_sensor a = {(float)accelerometer[0], (float)accelerometer[1], (float)accelerometer[2]};
 
@@ -262,7 +352,7 @@ int iAC::compass_heading()
 	double y_mag_comp = x_mag * sin(roll) * sin(pitch) + y_mag * cos(roll) - z_mag * sin(roll) * cos(pitch);
 
 	// arctangent of y/x converted to degrees
-	double heading = 180 * atan2(y_mag_comp, x_mag_comp) / M_PI;
+	double heading = 180 * atan2(x_mag_comp, y_mag_comp) / M_PI;
 
 	if (heading <= 0)
 	{
@@ -273,10 +363,10 @@ int iAC::compass_heading()
 		heading = 360 - heading;
 	}
 
-	return map(heading, 0, 359, 359, 0);
+	return heading;
 }
 
-bool iAC::is_gesture(motion_event event)
+bool iAC::is_gesture(motion_event event, bool blocking)
 {
 	switch (event)
 	{
@@ -284,10 +374,10 @@ bool iAC::is_gesture(motion_event event)
 		return acceleration(STRENGTH) > 5000;
 
 	case EVENT_BOARD_UP:
-		return acceleration(AXIS_Y) < 0;
+		return acceleration(AXIS_Y) < -600;
 
 	case EVENT_BOARD_DOWN:
-		return acceleration(AXIS_Y) > 0;
+		return acceleration(AXIS_Y) > 600;
 
 	case EVENT_SCREEN_UP:
 	{
@@ -313,8 +403,46 @@ bool iAC::is_gesture(motion_event event)
 		return roll >= 30;
 	}
 
-	case EVENT_FREE_FALL:
-		return acceleration(STRENGTH) > 2000;
+	case EVENT_FREE_FALL: {
+		if (blocking) {
+			bool lowStrengthContinue = false;
+			for (int time=0;time<300;time+=40) {
+				if (acceleration(STRENGTH) < 400) {
+					lowStrengthContinue = true;
+					vTaskDelay(20 / portTICK_RATE_MS);
+					continue;
+				} else {
+					lowStrengthContinue = false;
+					break;
+				}
+			}
+			return lowStrengthContinue;
+		} else {
+			static bool startCalcLowStrengthContinue = false;
+			static unsigned long xStartCalc;
+			if (acceleration(STRENGTH) < 500) {
+				if (!startCalcLowStrengthContinue) {
+					xStartCalc = esp_timer_get_time();
+					startCalcLowStrengthContinue = true;
+					// ESP_LOGI("iAC", "Start free fall %lld", esp_timer_get_time());
+				} else {
+					if ((esp_timer_get_time() - xStartCalc) >= 220E3) { // over 220 mS
+						startCalcLowStrengthContinue = false;
+						// ESP_LOGI("iAC", "End free fall - 2");
+						return true;
+					} else {
+						// ESP_LOGI("iAC", "free fall %lld", esp_timer_get_time() - xStartCalc);
+					}
+				}
+			} else {
+				// ESP_LOGI("iAC", "End free fall - 1 %lld", esp_timer_get_time() - xStartCalc);
+				xStartCalc = 0;
+				startCalcLowStrengthContinue = false;
+				return false;
+			}
+		}
+	}
+		
 
 	case EVENT_3G:
 		return acceleration(STRENGTH) > 3000;
@@ -332,12 +460,6 @@ bool iAC::is_gesture(motion_event event)
 
 int iAC::rotation(acc_meg_axis axis)
 {
-	if (!Acc)
-	{
-		ESP_LOGI("iAC", "Acc is null");
-		return 0;
-	}
-
 	double x_g_value = -accelerometer[0] / 1000.0; /* Acceleration in x-direction in g units */
 	double y_g_value = -accelerometer[1] / 1000.0; /* Acceleration in y-direction in g units */
 	double z_g_value = -accelerometer[2] / 1000.0; /* Acceleration in z-direction in g units */
@@ -363,12 +485,6 @@ int iAC::rotation(acc_meg_axis axis)
 
 double iAC::magnetic_force(acc_meg_axis axis)
 {
-	if (!Mag)
-	{
-		ESP_LOGI("iAC", "Mag is null");
-		return 0;
-	}
-
 	ESP_LOGI("iAC", "Mag[mGauss]: %" PRId32 " %" PRId32 " %" PRId32, magnetometer[0], magnetometer[1], magnetometer[2]);
 
 	switch (axis)
@@ -457,174 +573,216 @@ void iAC::calibrate_compass(HT16K33 *ht16k33)
 
 void iAC::accellerometer_range(float range)
 {
-	if (Acc)
-	{
-		Acc->SetFS(range);
-	}
-
 	acc_range = range;
+
+	uint8_t buff[2];
+
+	// Set Full-scale selection
+	buff[0] = 0x23;																						   // CTRL_REG4_A
+	buff[1] = (0 << 7) | (0 << 6) | (ACCRANGR2FSMODE(acc_range) << 4) | (0 << 3) | (0b00 << 1) | (0 << 0); //  continuous update, data LSb at lower address,  Full-scale selection, Normal mode, self-test disabled, SPI 3-wire disabled
+
+	i2c->write(channel, address, buff, 2);
 }
 
-void iAC::sram_write_byte(int addr, int data) {
-	if (addr < 0 || addr > 63) {
+void iAC::sram_write_byte(int addr, int data)
+{
+	if (addr < 0 || addr > 63)
+	{
 		return;
 	}
 
-	uint8_t buff[2] = { (uint8_t)(addr + 0x20), (uint8_t)data };
+	uint8_t buff[2] = {(uint8_t)(addr + 0x20), (uint8_t)data};
 	i2c->write(0, 0x6F, buff, 2);
 }
 
-void iAC::sram_write_byte(int addr, void *data) {
-	if (!data) return;
+void iAC::sram_write_byte(int addr, void *data)
+{
+	if (!data)
+		return;
 
-	sram_write_byte(addr, (int)((uint8_t*)data)[0]);
+	sram_write_byte(addr, (int)((uint8_t *)data)[0]);
 }
 
-int iAC::sram_read_byte(int addr) {
-	if (addr < 0 || addr > 63) {
+int iAC::sram_read_byte(int addr)
+{
+	if (addr < 0 || addr > 63)
+	{
 		return 0;
 	}
 
 	uint8_t data;
 	addr += 0x20;
-	i2c->read(0, 0x6F, (uint8_t*)&addr, 1, (uint8_t*)&data, 1);
+	i2c->read(0, 0x6F, (uint8_t *)&addr, 1, (uint8_t *)&data, 1);
 
 	return data;
 }
 
-void iAC::sram_write_word(int addr, int16_t data) {
-	if (addr < 0 || addr > 63) {
+void iAC::sram_write_word(int addr, int16_t data)
+{
+	if (addr < 0 || addr > 63)
+	{
 		return;
 	}
 
-	uint8_t buff[3] = { (uint8_t)(addr + 0x20) };
+	uint8_t buff[3] = {(uint8_t)(addr + 0x20)};
 	memcpy(&buff[1], &data, 2);
 	i2c->write(0, 0x6F, buff, 3);
 }
 
-void iAC::sram_write_word(int addr, void *data) {
-	if (!data) return;
+void iAC::sram_write_word(int addr, void *data)
+{
+	if (!data)
+		return;
 
-	sram_write_word(addr, (int16_t)((int16_t*)data)[0]);
+	sram_write_word(addr, (int16_t)((int16_t *)data)[0]);
 }
 
-int16_t iAC::sram_read_word(int addr) {
-	if (addr < 0 || addr > 63) {
+int16_t iAC::sram_read_word(int addr)
+{
+	if (addr < 0 || addr > 63)
+	{
 		return 0;
 	}
 
 	int16_t data;
 	addr += 0x20;
-	i2c->read(0, 0x6F, (uint8_t*)&addr, 1, (uint8_t*)&data, 2);
+	i2c->read(0, 0x6F, (uint8_t *)&addr, 1, (uint8_t *)&data, 2);
 
 	return data;
 }
 
-void iAC::sram_write_dword(int addr, int32_t data) {
-	if (addr < 0 || addr > 63) {
+void iAC::sram_write_dword(int addr, int32_t data)
+{
+	if (addr < 0 || addr > 63)
+	{
 		return;
 	}
 
 	addr += 0x20;
-	uint8_t buff[5] = { (uint8_t)(addr) };
+	uint8_t buff[5] = {(uint8_t)(addr)};
 	memcpy(&buff[1], &data, 4);
 	i2c->write(0, 0x6F, buff, 5);
 }
 
-void iAC::sram_write_dword(int addr, void *data) {
-	if (!data) return;
+void iAC::sram_write_dword(int addr, void *data)
+{
+	if (!data)
+		return;
 
-	sram_write_dword(addr, (int32_t)((int32_t*)data)[0]);
+	sram_write_dword(addr, (int32_t)((int32_t *)data)[0]);
 }
 
-int32_t iAC::sram_read_dword(int addr) {
-	if (addr < 0 || addr > 63) {
+int32_t iAC::sram_read_dword(int addr)
+{
+	if (addr < 0 || addr > 63)
+	{
 		return 0;
 	}
 
 	int32_t data;
 	addr += 0x20;
-	i2c->read(0, 0x6F, (uint8_t*)&addr, 1, (uint8_t*)&data, 4);
+	i2c->read(0, 0x6F, (uint8_t *)&addr, 1, (uint8_t *)&data, 4);
 
 	return data;
 }
 
-void iAC::eeprom_write_byte(int addr, int data) {
-	if (addr < 0 || addr > 127) {
+void iAC::eeprom_write_byte(int addr, int data)
+{
+	if (addr < 0 || addr > 127)
+	{
 		return;
 	}
 
-	uint8_t buff[2] = { (uint8_t)(addr), (uint8_t)data };
+	uint8_t buff[2] = {(uint8_t)(addr), (uint8_t)data};
 	i2c->write(0, 0x57, buff, 2);
+	vTaskDelay(20 / portTICK_RATE_MS);
 }
 
-void iAC::eeprom_write_byte(int addr, void *data) {
-	if (!data) return;
+void iAC::eeprom_write_byte(int addr, void *data)
+{
+	if (!data)
+		return;
 
-	eeprom_write_byte(addr, (int)((uint8_t*)data)[0]);
+	eeprom_write_byte(addr, (int)((uint8_t *)data)[0]);
 }
 
-int iAC::eeprom_read_byte(int addr) {
-	if (addr < 0 || addr > 127) {
+int iAC::eeprom_read_byte(int addr)
+{
+	if (addr < 0 || addr > 127)
+	{
 		return 0;
 	}
 
 	uint8_t data;
-	i2c->read(0, 0x57, (uint8_t*)&addr, 1, (uint8_t*)&data, 1);
+	i2c->read(0, 0x57, (uint8_t *)&addr, 1, (uint8_t *)&data, 1);
 
 	return data;
 }
 
-void iAC::eeprom_write_word(int addr, int16_t data) {
-	if (addr < 0 || addr > 127) {
+void iAC::eeprom_write_word(int addr, int16_t data)
+{
+	if (addr < 0 || addr > 127)
+	{
 		return;
 	}
 
-	uint8_t buff[3] = { (uint8_t)(addr) };
+	uint8_t buff[3] = {(uint8_t)(addr)};
 	memcpy(&buff[1], &data, 2);
 	i2c->write(0, 0x57, buff, 3);
+	vTaskDelay(20 / portTICK_RATE_MS);
 }
 
-void iAC::eeprom_write_word(int addr, void *data) {
-	if (!data) return;
+void iAC::eeprom_write_word(int addr, void *data)
+{
+	if (!data)
+		return;
 
-	eeprom_write_word(addr, (int16_t)((int16_t*)data)[0]);
+	eeprom_write_word(addr, (int16_t)((int16_t *)data)[0]);
 }
 
-int16_t iAC::eeprom_read_word(int addr) {
-	if (addr < 0 || addr > 127) {
+int16_t iAC::eeprom_read_word(int addr)
+{
+	if (addr < 0 || addr > 127)
+	{
 		return 0;
 	}
 
 	int16_t data;
-	i2c->read(0, 0x57, (uint8_t*)&addr, 1, (uint8_t*)&data, 2);
+	i2c->read(0, 0x57, (uint8_t *)&addr, 1, (uint8_t *)&data, 2);
 
 	return data;
 }
 
-void iAC::eeprom_write_dword(int addr, int32_t data) {
-	if (addr < 0 || addr > 127) {
+void iAC::eeprom_write_dword(int addr, int32_t data)
+{
+	if (addr < 0 || addr > 127)
+	{
 		return;
 	}
 
-	uint8_t buff[5] = { (uint8_t)(addr) };
+	uint8_t buff[5] = {(uint8_t)(addr)};
 	memcpy(&buff[1], &data, 4);
 	i2c->write(0, 0x57, buff, 5);
+	vTaskDelay(20 / portTICK_RATE_MS);
 }
 
-void iAC::eeprom_write_dword(int addr, void *data) {
-	if (!data) return;
+void iAC::eeprom_write_dword(int addr, void *data)
+{
+	if (!data)
+		return;
 
-	eeprom_write_dword(addr, (int32_t)((int32_t*)data)[0]);
+	eeprom_write_dword(addr, (int32_t)((int32_t *)data)[0]);
 }
 
-int32_t iAC::eeprom_read_dword(int addr) {
-	if (addr < 0 || addr > 127) {
+int32_t iAC::eeprom_read_dword(int addr)
+{
+	if (addr < 0 || addr > 127)
+	{
 		return 0;
 	}
 
 	int32_t data;
-	i2c->read(0, 0x57, (uint8_t*)&addr, 1, (uint8_t*)&data, 4);
+	i2c->read(0, 0x57, (uint8_t *)&addr, 1, (uint8_t *)&data, 4);
 
 	return data;
 }

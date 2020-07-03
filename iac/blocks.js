@@ -39,7 +39,7 @@ Blockly.Blocks['iac_on_gesture'] = {
 						[
 							Blockly.Msg.IAC_GESTURE_FREE_FALL_MESSAGE,
 							"EVENT_FREE_FALL"
-						],
+						],/*
 						[
 							Blockly.Msg.IAC_GESTURE_3G_MESSAGE,
 							"EVENT_3G"
@@ -51,7 +51,7 @@ Blockly.Blocks['iac_on_gesture'] = {
 						[
 							Blockly.Msg.IAC_GESTURE_8G_MESSAGE,
 							"EVENT_8G"
-						]
+						]*/
 					]
 				},
 				{
@@ -162,7 +162,7 @@ Blockly.Blocks['iac_is_gesture'] = {
 						[
 							Blockly.Msg.IAC_GESTURE_FREE_FALL_MESSAGE,
 							"EVENT_FREE_FALL"
-						],
+						],/*
 						[
 							Blockly.Msg.IAC_GESTURE_3G_MESSAGE,
 							"EVENT_3G"
@@ -174,7 +174,7 @@ Blockly.Blocks['iac_is_gesture'] = {
 						[
 							Blockly.Msg.IAC_GESTURE_8G_MESSAGE,
 							"EVENT_8G"
-						]
+						]*/
 					]
 				}
 			],
@@ -303,7 +303,7 @@ Blockly.Blocks['iac_set_accellerometer_range'] = {
 		});
 	}
 };
-
+/*
 Blockly.Blocks['sram_write_byte'] = {
 	init: function () {
 		this.jsonInit({
@@ -443,7 +443,7 @@ Blockly.Blocks['sram_read_dword'] = {
 			"helpUrl": ""
 		});
 	}
-};
+};*/
 
 Blockly.Blocks['eeprom_write_byte'] = {
 	init: function () {
@@ -511,7 +511,7 @@ Blockly.Blocks['eeprom_write_word'] = {
 			"inputsInline": true,
 			"previousStatement": null,
 			"nextStatement": null,
-			"colour": 300,
+			"colour": 180,
 			"tooltip": Blockly.Msg.IAC_EEPROM_WRITE_WORD_TOOLTIP,
 			"helpUrl": ""
 		});
@@ -532,7 +532,7 @@ Blockly.Blocks['eeprom_read_word'] = {
 			],
 			"inputsInline": true,
 			"output": "Number",
-			"colour": 300,
+			"colour": 180,
 			"tooltip": Blockly.Msg.IAC_EEPROM_READ_WORD_TOOLTIP,
 			"helpUrl": ""
 		});
@@ -558,7 +558,7 @@ Blockly.Blocks['eeprom_write_dword'] = {
 			"inputsInline": true,
 			"previousStatement": null,
 			"nextStatement": null,
-			"colour": 300,
+			"colour": 135,
 			"tooltip": Blockly.Msg.IAC_EEPROM_WRITE_DWORD_TOOLTIP,
 			"helpUrl": ""
 		});
@@ -579,7 +579,7 @@ Blockly.Blocks['eeprom_read_dword'] = {
 			],
 			"inputsInline": true,
 			"output": "Number",
-			"colour": 300,
+			"colour": 135,
 			"tooltip": Blockly.Msg.IAC_EEPROM_READ_DWORD_TOOLTIP,
 			"helpUrl": ""
 		});

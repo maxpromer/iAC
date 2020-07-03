@@ -16,7 +16,7 @@ Blockly.Msg.IAC_ROTATION_TOOLTIP = "";
 Blockly.Msg.IAC_MAGNETIC_FORCE_MESSAGE = "สนามแม่เหล็ก (uT) %1";
 Blockly.Msg.IAC_MAGNETIC_FORCE_TOOLTIP = "";
 
-Blockly.Msg.IAC_CALIBATE_COMPASS_MESSAGE = "ปรับจูนเซ็นเซอร์สนามแม่เหล็ก";
+Blockly.Msg.IAC_CALIBATE_COMPASS_MESSAGE = "ปรับจูนเซ็นเซอร์เข็มทิศ";
 Blockly.Msg.IAC_CALIBATE_COMPASS_TOOLTIP = "";
 
 Blockly.Msg.IAC_SET_ACCELLEROMETER_MESSAGE = "ตั้งค่าความเร่งสูงสุด %1";

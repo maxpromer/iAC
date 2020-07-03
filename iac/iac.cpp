@@ -149,7 +149,7 @@ void iAC::process(Driver *drv)
 		}
 
 		// MAG Select mode
-		buff[0] = 0x60;
+		buff[0] = 0x60; // CFG_REG_A_M
 		/*
 					BIT 7: 1 - temperature compensation enable
 					BIT 6: 0 - normal mode
@@ -159,6 +159,23 @@ void iAC::process(Driver *drv)
 					BIT 1-0: 11 - Continuous mode
 					*/
 		buff[1] = (1 << 7) | (0 << 6) | (0 << 5) | (0 << 4) | (0b11 << 2) | (0b00 << 0);
+		if (i2c->write(channel, MEG_ADDR, buff, 2) != ESP_OK)
+		{
+			state = s_error;
+			break;
+		}
+
+		// MAG Digital Low Pass enabled
+		buff[0] = 0x61; // CFG_REG_B_M
+		/*
+					BIT 7-5: 000
+					BIT 4: 0 - Enables offset cancellation in single measurement mode
+					BIT 3: 0 - If ‘1’, the interrupt block recognition checks data after the hard-iron correction to discover the interrrupt.
+					BIT 2: 0 - set pulse is released every 63 ODR; 
+					BIT 1: 0 - offset cancellation disabled
+					BIT 0: 1 - digital filter enabled
+					*/
+		buff[1] = 0b00000001;
 		if (i2c->write(channel, MEG_ADDR, buff, 2) != ESP_OK)
 		{
 			state = s_error;
@@ -327,11 +344,47 @@ int32_t iAC::acceleration(acc_meg_axis axis)
 	}
 }
 
-int iAC::compass_heading()
+int iAC::compass_heading(HT16K33 *ht16k33)
 {
+	if (!CalibrateMag)
+	{
+		if (!loadCalibrateFromSRAM())
+		{
+			calibrate_compass(ht16k33);
+		}
+		CalibrateMag = true;
+	}
+
 	LSM303AGR_sensor m = {(float)magnetometer[0], (float)magnetometer[1], (float)magnetometer[2]};
 	LSM303AGR_sensor a = {(float)accelerometer[0], (float)accelerometer[1], (float)accelerometer[2]};
+	/*
+	if (m.x < mag_min.x)
+	{
+		mag_min.x = m.x;
+	}
+	if (m.x > mag_max.x)
+	{
+		mag_max.x = m.x;
+	}
 
+	if (m.y < mag_min.y)
+	{
+		mag_min.y = m.y;
+	}
+	if (m.y > mag_max.y)
+	{
+		mag_max.y = m.y;
+	}
+
+	if (m.z < mag_min.z)
+	{
+		mag_min.z = m.z;
+	}
+	if (m.z > mag_max.z)
+	{
+		mag_max.z = m.z;
+	}
+*/
 	// use calibration values to shift and scale magnetometer measurements
 	double x_mag = (0.0 + m.x - mag_min.x) / (mag_max.x - mag_min.x) * 2 - 1;
 	double y_mag = (0.0 + m.y - mag_min.y) / (mag_max.y - mag_min.y) * 2 - 1;
@@ -403,39 +456,56 @@ bool iAC::is_gesture(motion_event event, bool blocking)
 		return roll >= 30;
 	}
 
-	case EVENT_FREE_FALL: {
-		if (blocking) {
+	case EVENT_FREE_FALL:
+	{
+		if (blocking)
+		{
 			bool lowStrengthContinue = false;
 			// ESP_LOGI("iAC", "Start free fall %lld", esp_timer_get_time());
-			for (int i=0;i<240;i+=40) {
-				if (acceleration(STRENGTH) < 500) {
+			for (int i = 0; i < 240; i += 40)
+			{
+				if (acceleration(STRENGTH) < 500)
+				{
 					lowStrengthContinue = true;
 					vTaskDelay(40 / portTICK_RATE_MS);
-				} else {
+				}
+				else
+				{
 					lowStrengthContinue = false;
 					break;
 				}
 			}
 			// if (lowStrengthContinue) ESP_LOGI("iAC", "Stop free fall %lld", esp_timer_get_time());
 			return lowStrengthContinue;
-		} else {
+		}
+		else
+		{
 			static bool startCalcLowStrengthContinue = false;
 			static unsigned long xStartCalc;
-			if (acceleration(STRENGTH) < 500) {
-				if (!startCalcLowStrengthContinue) {
+			if (acceleration(STRENGTH) < 500)
+			{
+				if (!startCalcLowStrengthContinue)
+				{
 					xStartCalc = esp_timer_get_time();
 					startCalcLowStrengthContinue = true;
 					// ESP_LOGI("iAC", "Start free fall %lld", esp_timer_get_time());
-				} else {
-					if ((esp_timer_get_time() - xStartCalc) >= 220E3) { // over 220 mS
+				}
+				else
+				{
+					if ((esp_timer_get_time() - xStartCalc) >= 220E3)
+					{ // over 220 mS
 						startCalcLowStrengthContinue = false;
 						// ESP_LOGI("iAC", "End free fall - 2");
 						return true;
-					} else {
+					}
+					else
+					{
 						// ESP_LOGI("iAC", "free fall %lld", esp_timer_get_time() - xStartCalc);
 					}
 				}
-			} else {
+			}
+			else
+			{
 				// ESP_LOGI("iAC", "End free fall - 1 %lld", esp_timer_get_time() - xStartCalc);
 				xStartCalc = 0;
 				startCalcLowStrengthContinue = false;
@@ -443,7 +513,6 @@ bool iAC::is_gesture(motion_event event, bool blocking)
 			}
 		}
 	}
-		
 
 	case EVENT_3G:
 		return acceleration(STRENGTH) > 3000;
@@ -509,6 +578,118 @@ double iAC::magnetic_force(acc_meg_axis axis)
 
 void iAC::calibrate_compass(HT16K33 *ht16k33)
 {
+	ht16k33->scroll((char *)"TILT TO FILL SCREEN", true);
+	ht16k33->wait_idle();
+
+	uint8_t display[16];
+	memset(display, 0, 16);
+
+	uint8_t before_index_cols = -1;
+	uint8_t before_index_rows = -1;
+
+	int delay = 0;
+	bool pixelShow = false;
+	while (1)
+	{
+		LSM303AGR_sensor m = {(float)magnetometer[0], (float)magnetometer[1], (float)magnetometer[2]};
+		if (m.x < mag_min.x)
+		{
+			mag_min.x = m.x;
+		}
+		if (m.x > mag_max.x)
+		{
+			mag_max.x = m.x;
+		}
+
+		if (m.y < mag_min.y)
+		{
+			mag_min.y = m.y;
+		}
+		if (m.y > mag_max.y)
+		{
+			mag_max.y = m.y;
+		}
+
+		if (m.z < mag_min.z)
+		{
+			mag_min.z = m.z;
+		}
+		if (m.z > mag_max.z)
+		{
+			mag_max.z = m.z;
+		}
+
+		double x_g_value = -accelerometer[0] / 1000.0; /* Acceleration in x-direction in g units */
+		double y_g_value = -accelerometer[1] / 1000.0; /* Acceleration in y-direction in g units */
+		double z_g_value = -accelerometer[2] / 1000.0; /* Acceleration in z-direction in g units */
+
+		double roll = (((atan2(z_g_value, x_g_value) * 180) / 3.14) + 180);
+		double pitch = (((atan2(y_g_value, z_g_value) * 180) / 3.14) + 180);
+
+		roll = (roll >= 270) ? (270 - roll) : (roll >= 90) ? (fmod(90 - roll, -180) + 180) : -90 - roll;
+		pitch = 180 - pitch;
+
+		// memset(display, 0, 16);
+		uint8_t index_cols = map(roll, -60, 60, 0, 15);
+		uint8_t index_rows = map(pitch, -60, 60, 0, 7);
+
+		if (before_index_cols == -1 || before_index_rows == -1)
+		{
+			before_index_cols = index_cols;
+			before_index_rows = index_rows;
+		}
+
+		if (index_cols >= 0 && index_cols <= 15 && index_rows >= 0 && index_rows <= 7)
+		{
+			if ((index_cols != before_index_cols) || (index_rows != before_index_rows))
+			{
+				display[before_index_cols] |= 0x80 >> before_index_rows;
+			}
+			if (pixelShow)
+			{
+				display[index_cols] |= 0x80 >> index_rows;
+
+				bool fullScreen = true;
+				for (int i = 0; i < 16; i++)
+				{
+					if (display[i] != 0xFF)
+					{
+						fullScreen = false;
+						break;
+					}
+				}
+				if (fullScreen)
+					break;
+			}
+			else
+			{
+				display[index_cols] &= ~(0x80 >> index_rows);
+			}
+			if (delay >= 200)
+			{
+				delay = 0;
+				pixelShow = !pixelShow;
+			}
+		}
+
+		before_index_cols = index_cols;
+		before_index_rows = index_rows;
+
+		ht16k33->show(display);
+
+		vTaskDelay(50 / portTICK_RATE_MS);
+		delay += 50;
+	}
+
+	ht16k33->scroll((char *)"FINISH", true);
+
+	saveCalibrateIntoSRAM();
+
+	ht16k33->wait_idle();
+
+	CalibrateMag = true;
+
+	/*
 	ht16k33->show((uint8_t *)"\x3c\x42\x81\x81\x81\x42\x24\x18\x18\x24\x42\x81\x81\x81\x42\x3c");
 	while (acceleration(STRENGTH) < 1800)
 		vTaskDelay(50 / portTICK_RATE_MS);
@@ -570,6 +751,7 @@ void iAC::calibrate_compass(HT16K33 *ht16k33)
 	}
 
 	ht16k33->show((uint8_t *)"\x0\x0\x0\x0\x0\x0\x0\x0\x0\x0\x0\x0\x0\x0\x0\x0");
+	*/
 }
 
 void iAC::accellerometer_range(float range)
@@ -687,6 +869,30 @@ int32_t iAC::sram_read_dword(int addr)
 	return data;
 }
 
+void iAC::sram_write_block(int addr, uint8_t *data, uint8_t size)
+{
+	if (addr < 0 || addr > 63)
+	{
+		return;
+	}
+
+	addr += 0x20;
+	uint8_t buff[1 + size] = {(uint8_t)(addr)};
+	memcpy(&buff[1], data, size);
+	i2c->write(0, 0x6F, buff, 1 + size);
+}
+
+void iAC::sram_read_block(int addr, uint8_t *data, uint8_t size)
+{
+	if (addr < 0 || addr > 63)
+	{
+		return;
+	}
+
+	addr += 0x20;
+	i2c->read(0, 0x6F, (uint8_t *)&addr, 1, data, size);
+}
+
 void iAC::eeprom_write_byte(int addr, int data)
 {
 	if (addr < 0 || addr > 127)
@@ -786,6 +992,68 @@ int32_t iAC::eeprom_read_dword(int addr)
 	i2c->read(0, 0x57, (uint8_t *)&addr, 1, (uint8_t *)&data, 4);
 
 	return data;
+}
+
+bool iAC::loadCalibrateFromSRAM()
+{
+	int16_t dataBuffer[7]; // XYZ in int16_t x2 and CRC in int16_t
+	// sram_read_block(0, (uint8_t*) dataBuffer, 7 * sizeof(int16_t));
+	for (int i = 0; i < 7; i++)
+	{
+		dataBuffer[i] = sram_read_word(i * 2);
+		// ESP_LOGI("SRAM", "Load: %d: 0x%.4X", i, dataBuffer[i]);
+	}
+
+	int16_t crc = calCRC((uint8_t *)dataBuffer, 6 * sizeof(int16_t));
+	if (crc == dataBuffer[6])
+	{
+		mag_min.x = dataBuffer[0];
+		mag_min.y = dataBuffer[1];
+		mag_min.z = dataBuffer[2];
+		mag_max.x = dataBuffer[3];
+		mag_max.y = dataBuffer[4];
+		mag_max.z = dataBuffer[5];
+
+		// ESP_LOGI("iAC", "Load Calibrate From SRAM -> OK");
+
+		return true;
+	}
+
+	// ESP_LOGI("iAC", "Load Calibrate From SRAM -> Fail, 0x%x", crc);
+
+	return false;
+}
+
+void iAC::saveCalibrateIntoSRAM()
+{
+	int16_t dataBuffer[7]; // XYZ in int16_t x2 and CRC in int16_t
+	dataBuffer[0] = mag_min.x;
+	dataBuffer[1] = mag_min.y;
+	dataBuffer[2] = mag_min.z;
+	dataBuffer[3] = mag_max.x;
+	dataBuffer[4] = mag_max.y;
+	dataBuffer[5] = mag_max.z;
+	dataBuffer[6] = calCRC((uint8_t *)dataBuffer, 6 * sizeof(int16_t));
+
+	// sram_write_block(0, (uint8_t*) dataBuffer, 7 * sizeof(int16_t));
+	for (int i = 0; i < 7; i++)
+	{
+		sram_write_word(i * 2, dataBuffer[i]);
+		// ESP_LOGI("SRAM", "Save: %d: 0x%.4X", i, dataBuffer[i]);
+	}
+
+	// ESP_LOGI("iAC", "Save Calibrate From SRAM -> OK");
+}
+
+int16_t iAC::calCRC(uint8_t *data, uint8_t size)
+{
+	int16_t sum = 0;
+	for (int i = 0; i < size; i++)
+	{
+		sum += data[i];
+	}
+	sum = ~sum;
+	return sum;
 }
 
 #endif

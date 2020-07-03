@@ -15,7 +15,7 @@ Blockly.JavaScript['iac_acceleration'] = function (block) {
 };
 
 Blockly.JavaScript['iac_compass_heading'] = function (block) {
-	var code = `${iAC_BEGIN_WORD}.compass_heading()`;
+	var code = `${iAC_BEGIN_WORD}.compass_heading(&ht16k33)`;
 	return [code, Blockly.JavaScript.ORDER_NONE];
 };
 

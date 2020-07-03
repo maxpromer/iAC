@@ -73,13 +73,18 @@ private:
 		return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 	}
 
-	LSM303AGR_sensor mag_max = { 253.0, 516.0, 126.0 };
-	LSM303AGR_sensor mag_min = { -627.0, -382.0, -766.0 };
+	bool CalibrateMag = false;
+	LSM303AGR_sensor mag_max = { -100000.0, -100000.0, -100000.0 };
+	LSM303AGR_sensor mag_min = { 100000.0, 100000.0, 100000.0 };
 
 	uint8_t acc_range = 8; // 8g
 
 	int32_t accelerometer[3];
 	int32_t magnetometer[3];
+
+	bool loadCalibrateFromSRAM() ;
+	void saveCalibrateIntoSRAM() ;
+	int16_t calCRC(uint8_t *data, uint8_t size) ;
 
 public:
 	// constructor
@@ -98,7 +103,7 @@ public:
 	// method
 	void on_gesture(motion_event event, GestureHandle cb);
 	int32_t acceleration(acc_meg_axis axis);
-	int compass_heading();
+	int compass_heading(HT16K33 *);
 	bool is_gesture(motion_event event, bool blocking = true);
 	int rotation(acc_meg_axis axis);
 	double magnetic_force(acc_meg_axis axis);
@@ -115,6 +120,8 @@ public:
 	void sram_write_dword(int, int32_t);
 	void sram_write_dword(int, void*);
 	int32_t sram_read_dword(int);
+	void sram_write_block(int, uint8_t*, uint8_t) ;
+	void sram_read_block(int, uint8_t*, uint8_t);
 
 
 	// EEPROM on RTC

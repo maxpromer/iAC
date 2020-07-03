@@ -406,8 +406,8 @@ bool iAC::is_gesture(motion_event event, bool blocking)
 	case EVENT_FREE_FALL: {
 		if (blocking) {
 			bool lowStrengthContinue = false;
-			for (int time=0;time<300;time+=40) {
-				if (acceleration(STRENGTH) < 400) {
+			for (int time=0;time<200;time+=40) {
+				if (acceleration(STRENGTH) < 500) {
 					lowStrengthContinue = true;
 					vTaskDelay(20 / portTICK_RATE_MS);
 					continue;

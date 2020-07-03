@@ -406,16 +406,17 @@ bool iAC::is_gesture(motion_event event, bool blocking)
 	case EVENT_FREE_FALL: {
 		if (blocking) {
 			bool lowStrengthContinue = false;
-			for (int time=0;time<200;time+=40) {
+			// ESP_LOGI("iAC", "Start free fall %lld", esp_timer_get_time());
+			for (int i=0;i<240;i+=40) {
 				if (acceleration(STRENGTH) < 500) {
 					lowStrengthContinue = true;
-					vTaskDelay(20 / portTICK_RATE_MS);
-					continue;
+					vTaskDelay(40 / portTICK_RATE_MS);
 				} else {
 					lowStrengthContinue = false;
 					break;
 				}
 			}
+			// if (lowStrengthContinue) ESP_LOGI("iAC", "Stop free fall %lld", esp_timer_get_time());
 			return lowStrengthContinue;
 		} else {
 			static bool startCalcLowStrengthContinue = false;

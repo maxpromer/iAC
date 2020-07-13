@@ -334,7 +334,7 @@ int32_t iAC::acceleration(acc_meg_axis axis)
 		return -accelerometer[1];
 
 	case AXIS_Z:
-		return accelerometer[2];
+		return -accelerometer[2];
 
 	case STRENGTH:
 		return sqrt(pow(accelerometer[0], 2) + pow(accelerometer[1], 2) + pow(accelerometer[2], 2));

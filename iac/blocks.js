@@ -445,6 +445,26 @@ Blockly.Blocks['sram_read_dword'] = {
 	}
 };*/
 
+Blockly.Blocks['eeprom_header'] = {
+	init: function () {
+
+	},
+	xmlToolbox: function() {
+		// Create our shared stylesheet:
+		const sheet = new CSSStyleSheet();
+		sheet.replaceSync(`
+		.HeaderLabelStyle > .blocklyFlyoutLabelText {
+			font-size: 26px;
+		}
+		`);
+		
+		// Apply the stylesheet to a document:
+		document.adoptedStyleSheets = [sheet];
+
+		return `<label text="EEPROM" web-class="HeaderLabelStyle"></label>`;
+	}
+};
+
 Blockly.Blocks['eeprom_write_byte'] = {
 	init: function () {
 		this.jsonInit({
@@ -468,6 +488,22 @@ Blockly.Blocks['eeprom_write_byte'] = {
 			"tooltip": Blockly.Msg.IAC_EEPROM_WRITE_BYTE_TOOLTIP,
 			"helpUrl": ""
 		});
+	},
+	xmlToolbox: function() {
+		return `
+		<block type="eeprom_write_byte">
+		  	<value name="address">
+				<shadow type="math_number">
+					<field name="VALUE">0</field>
+				</shadow>
+			</value>
+			<value name="data">
+				<shadow type="math_number">
+					<field name="VALUE">0</field>
+				</shadow>
+			</value>
+		</block>
+		`;
 	}
 };
 
@@ -489,6 +525,17 @@ Blockly.Blocks['eeprom_read_byte'] = {
 			"tooltip": Blockly.Msg.IAC_EEPROM_READ_BYTE_TOOLTIP,
 			"helpUrl": ""
 		});
+	},
+	xmlToolbox: function() {
+		return `
+		<block type="eeprom_read_byte">
+		  	<value name="address">
+				<shadow type="math_number">
+					<field name="VALUE">0</field>
+				</shadow>
+			</value>
+		</block>
+		`;
 	}
 };
 
@@ -515,6 +562,22 @@ Blockly.Blocks['eeprom_write_word'] = {
 			"tooltip": Blockly.Msg.IAC_EEPROM_WRITE_WORD_TOOLTIP,
 			"helpUrl": ""
 		});
+	},
+	xmlToolbox: function() {
+		return `
+		<block type="eeprom_write_word">
+		  	<value name="address">
+				<shadow type="math_number">
+					<field name="VALUE">0</field>
+				</shadow>
+			</value>
+			<value name="data">
+				<shadow type="math_number">
+					<field name="VALUE">0</field>
+				</shadow>
+			</value>
+		</block>
+		`;
 	}
 };
 
@@ -536,6 +599,17 @@ Blockly.Blocks['eeprom_read_word'] = {
 			"tooltip": Blockly.Msg.IAC_EEPROM_READ_WORD_TOOLTIP,
 			"helpUrl": ""
 		});
+	},
+	xmlToolbox: function() {
+		return `
+		<block type="eeprom_read_word">
+		  	<value name="address">
+				<shadow type="math_number">
+					<field name="VALUE">0</field>
+				</shadow>
+			</value>
+		</block>
+		`;
 	}
 };
 
@@ -562,6 +636,22 @@ Blockly.Blocks['eeprom_write_dword'] = {
 			"tooltip": Blockly.Msg.IAC_EEPROM_WRITE_DWORD_TOOLTIP,
 			"helpUrl": ""
 		});
+	},
+	xmlToolbox: function() {
+		return `
+		<block type="eeprom_write_dword">
+		  	<value name="address">
+				<shadow type="math_number">
+					<field name="VALUE">0</field>
+				</shadow>
+			</value>
+			<value name="data">
+				<shadow type="math_number">
+					<field name="VALUE">0</field>
+				</shadow>
+			</value>
+		</block>
+		`;
 	}
 };
 
@@ -583,5 +673,16 @@ Blockly.Blocks['eeprom_read_dword'] = {
 			"tooltip": Blockly.Msg.IAC_EEPROM_READ_DWORD_TOOLTIP,
 			"helpUrl": ""
 		});
+	},
+	xmlToolbox: function() {
+		return `
+		<block type="eeprom_read_dword">
+		  	<value name="address">
+				<shadow type="math_number">
+					<field name="VALUE">0</field>
+				</shadow>
+			</value>
+		</block>
+		`;
 	}
 };

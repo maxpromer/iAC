@@ -461,7 +461,10 @@ Blockly.Blocks['eeprom_header'] = {
 		// Apply the stylesheet to a document:
 		document.adoptedStyleSheets = [sheet];
 
-		return `<label text="EEPROM" web-class="HeaderLabelStyle"></label>`;
+		return `
+		<sep gap="50"></sep>
+		<label text="EEPROM" web-class="HeaderLabelStyle"></label>
+		`;
 	}
 };
 

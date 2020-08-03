@@ -445,29 +445,6 @@ Blockly.Blocks['sram_read_dword'] = {
 	}
 };*/
 
-Blockly.Blocks['eeprom_header'] = {
-	init: function () {
-
-	},
-	xmlToolbox: function() {
-		// Create our shared stylesheet:
-		const sheet = new CSSStyleSheet();
-		sheet.replaceSync(`
-		.HeaderLabelStyle > .blocklyFlyoutLabelText {
-			font-size: 26px;
-		}
-		`);
-		
-		// Apply the stylesheet to a document:
-		document.adoptedStyleSheets = [sheet];
-
-		return `
-		<sep gap="50"></sep>
-		<label text="EEPROM" web-class="HeaderLabelStyle"></label>
-		`;
-	}
-};
-
 Blockly.Blocks['eeprom_write_byte'] = {
 	init: function () {
 		this.jsonInit({
